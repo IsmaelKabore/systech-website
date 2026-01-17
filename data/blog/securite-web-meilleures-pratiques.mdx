@@ -1,0 +1,420 @@
+---
+title: 'Sécurité Web : Protégez votre Application en 2026'
+date: '2025-12-15'
+tags: ['sécurité', 'cybersecurity', 'web', 'best-practices']
+draft: false
+summary: 'Guide complet sur la sécurité des applications web. Découvrez les meilleures pratiques et solutions de sécurité mises en œuvre par Systech.'
+authors: ['default']
+---
+
+## La Sécurité : Une Priorité Absolue
+
+Chez **Systech**, la sécurité n'est pas une option mais un fondement de chaque projet que nous développons. Voici notre approche complète de la cybersécurité.
+
+## Top 10 des Vulnérabilités Web (OWASP)
+
+### 1. Injection SQL
+
+**Problème** : Manipulation de requêtes SQL via des inputs utilisateur
+
+**Solution** :
+
+```typescript
+// ❌ VULNÉRABLE
+const query = `SELECT * FROM users WHERE id = ${userId}`
+
+// ✅ SÉCURISÉ - Requêtes paramétrées
+const query = 'SELECT * FROM users WHERE id = ?'
+db.query(query, [userId])
+
+// Avec ORM (Prisma)
+const user = await prisma.user.findUnique({
+  where: { id: userId },
+})
+```
+
+### 2. Authentification Cassée
+
+Implémentation sécurisée avec JWT :
+
+```typescript
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+
+// Hashage du mot de passe
+const hashedPassword = await bcrypt.hash(password, 12)
+
+// Création du token
+const token = jwt.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET, {
+  expiresIn: '1h',
+})
+
+// Vérification
+const decoded = jwt.verify(token, process.env.JWT_SECRET)
+```
+
+### 3. XSS (Cross-Site Scripting)
+
+Protection contre XSS :
+
+```typescript
+// Sanitization des inputs
+import DOMPurify from 'isomorphic-dompurify'
+
+const cleanHTML = DOMPurify.sanitize(userInput)
+
+// Content Security Policy
+const cspHeader = `
+  default-src 'self';
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: https:;
+  font-src 'self';
+`
+```
+
+### 4. CSRF (Cross-Site Request Forgery)
+
+Tokens anti-CSRF :
+
+```typescript
+import csrf from 'csurf'
+
+const csrfProtection = csrf({ cookie: true })
+
+app.post('/api/transfer', csrfProtection, (req, res) => {
+  // Protected endpoint
+})
+```
+
+## Architecture Sécurisée
+
+### Defense in Depth (Défense en Profondeur)
+
+```
+┌─────────────────────────────────────┐
+│         WAF (Firewall)              │
+├─────────────────────────────────────┤
+│      Load Balancer + SSL/TLS        │
+├─────────────────────────────────────┤
+│   API Gateway (Rate Limiting)       │
+├─────────────────────────────────────┤
+│  Application (Input Validation)     │
+├─────────────────────────────────────┤
+│   Database (Encryption at Rest)     │
+└─────────────────────────────────────┘
+```
+
+### Zero Trust Architecture
+
+Principes :
+
+- Vérifier explicitement
+- Utiliser le moindre privilège
+- Supposer une compromission
+
+## Chiffrement
+
+### HTTPS Everywhere
+
+Configuration Nginx :
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name systech.com;
+
+    ssl_certificate /etc/ssl/certs/systech.crt;
+    ssl_certificate_key /etc/ssl/private/systech.key;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+}
+```
+
+### Chiffrement des Données
+
+```typescript
+import crypto from 'crypto'
+
+// Chiffrement AES-256
+const algorithm = 'aes-256-gcm'
+const key = crypto.randomBytes(32)
+const iv = crypto.randomBytes(16)
+
+function encrypt(text: string): string {
+  const cipher = crypto.createCipheriv(algorithm, key, iv)
+  let encrypted = cipher.update(text, 'utf8', 'hex')
+  encrypted += cipher.final('hex')
+  const authTag = cipher.getAuthTag()
+
+  return encrypted + ':' + authTag.toString('hex')
+}
+
+function decrypt(encrypted: string): string {
+  const parts = encrypted.split(':')
+  const decipher = crypto.createDecipheriv(algorithm, key, iv)
+  decipher.setAuthTag(Buffer.from(parts[1], 'hex'))
+
+  let decrypted = decipher.update(parts[0], 'hex', 'utf8')
+  decrypted += decipher.final('utf8')
+
+  return decrypted
+}
+```
+
+## Gestion des Secrets
+
+### HashiCorp Vault
+
+```typescript
+import vault from 'node-vault'
+
+const client = vault({
+  endpoint: 'http://vault:8200',
+  token: process.env.VAULT_TOKEN,
+})
+
+// Récupérer un secret
+const secret = await client.read('secret/data/systech/api-keys')
+const apiKey = secret.data.data.api_key
+```
+
+### Variables d'Environnement
+
+```bash
+# .env (NEVER commit this file!)
+DATABASE_URL="postgresql://user:pass@localhost:5432/db"
+JWT_SECRET="your-super-secret-key-change-this"
+API_KEY="sk-proj-xxxxxxxxxxxxx"
+ENCRYPTION_KEY="base64-encoded-32-byte-key"
+```
+
+## Rate Limiting
+
+Prévention des attaques par force brute :
+
+```typescript
+import rateLimit from 'express-rate-limit'
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 tentatives
+  message: 'Trop de tentatives, réessayez plus tard',
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+app.post('/api/login', loginLimiter, loginController)
+```
+
+## Validation des Entrées
+
+Validation robuste avec Zod :
+
+```typescript
+import { z } from 'zod'
+
+const userSchema = z.object({
+  email: z.string().email(),
+  password: z
+    .string()
+    .min(12, 'Minimum 12 caractères')
+    .regex(/[A-Z]/, 'Au moins une majuscule')
+    .regex(/[a-z]/, 'Au moins une minuscule')
+    .regex(/[0-9]/, 'Au moins un chiffre')
+    .regex(/[^A-Za-z0-9]/, 'Au moins un caractère spécial'),
+  age: z.number().int().min(18).max(120),
+})
+
+try {
+  const validatedData = userSchema.parse(userData)
+  // Traitement sécurisé
+} catch (error) {
+  // Erreur de validation
+}
+```
+
+## Headers de Sécurité
+
+Configuration avec Helmet.js :
+
+```typescript
+import helmet from 'helmet'
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    frameguard: {
+      action: 'deny',
+    },
+    noSniff: true,
+    xssFilter: true,
+  })
+)
+```
+
+## Audit & Monitoring
+
+### Logging Sécurisé
+
+```typescript
+import winston from 'winston'
+
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.File({
+      filename: 'security.log',
+      level: 'warn',
+    }),
+  ],
+})
+
+// Logger les événements de sécurité
+logger.warn('Tentative de connexion échouée', {
+  ip: req.ip,
+  email: req.body.email,
+  timestamp: new Date(),
+})
+```
+
+### Détection d'Intrusion
+
+Surveillance en temps réel avec Prometheus :
+
+```yaml
+groups:
+  - name: security
+    rules:
+      - alert: HighFailedLoginRate
+        expr: rate(failed_logins_total[5m]) > 10
+        annotations:
+          summary: "Taux élevé d'échecs de connexion"
+
+      - alert: UnusualTrafficPattern
+        expr: rate(http_requests_total[1m]) > 1000
+        annotations:
+          summary: 'Trafic inhabituel détecté'
+```
+
+## Conformité & Certifications
+
+### RGPD (GDPR)
+
+Implémentation :
+
+- Consentement explicite
+- Droit à l'oubli
+- Portabilité des données
+- Chiffrement des données personnelles
+
+### SOC 2
+
+Systech suit les principes :
+
+- Sécurité
+- Disponibilité
+- Intégrité du traitement
+- Confidentialité
+- Vie privée
+
+## Tests de Sécurité
+
+### Penetration Testing
+
+Outils utilisés :
+
+- **OWASP ZAP** : Scanner automatisé
+- **Burp Suite** : Tests manuels
+- **Metasploit** : Exploitation
+- **Nmap** : Scan de ports
+
+### Code Review Automatisé
+
+```yaml
+# .github/workflows/security.yml
+name: Security Scan
+
+on: [push, pull_request]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run Snyk
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+```
+
+## Bonnes Pratiques Systech
+
+1. ✅ **Principe du moindre privilège**
+2. ✅ **Chiffrement partout** (transit & repos)
+3. ✅ **Authentification multi-facteurs** (MFA)
+4. ✅ **Mises à jour régulières** des dépendances
+5. ✅ **Backups chiffrés** et testés
+6. ✅ **Monitoring continu** des menaces
+7. ✅ **Formation** de l'équipe
+8. ✅ **Plan de réponse** aux incidents
+9. ✅ **Tests de pénétration** trimestriels
+10. ✅ **Audits de sécurité** réguliers
+
+## Plan de Réponse aux Incidents
+
+### Phase 1 : Détection
+
+- Alertes automatisées
+- Surveillance 24/7
+
+### Phase 2 : Confinement
+
+- Isolation des systèmes affectés
+- Blocage des accès malveillants
+
+### Phase 3 : Éradication
+
+- Suppression des menaces
+- Correction des vulnérabilités
+
+### Phase 4 : Récupération
+
+- Restauration des services
+- Vérification de l'intégrité
+
+### Phase 5 : Leçons Apprises
+
+- Post-mortem
+- Amélioration des processus
+
+## Conclusion
+
+La sécurité est un processus continu, pas une destination. **Systech** intègre la sécurité à chaque étape du développement avec une approche DevSecOps complète.
+
+Sécurisez votre application avec nous : [contact@systech.com](mailto:contact@systech.com)
+
+---
+
+_Dernière mise à jour : Janvier 2026_

@@ -1,0 +1,327 @@
+---
+title: 'DevOps et CI/CD : Les Meilleures Pratiques'
+date: '2025-12-28'
+tags: ['devops', 'cicd', 'automation', 'cloud']
+draft: false
+summary: 'Optimisez vos processus de développement avec les pratiques DevOps éprouvées de Systech. CI/CD, Infrastructure as Code et automatisation.'
+authors: ['default']
+---
+
+## DevOps : Culture et Outils
+
+Chez **Systech**, DevOps n'est pas qu'un ensemble d'outils, c'est une culture de collaboration et d'amélioration continue.
+
+## Pipeline CI/CD Moderne
+
+### Intégration Continue (CI)
+
+```yaml
+# Exemple GitLab CI
+stages:
+  - test
+  - build
+  - deploy
+
+test:
+  stage: test
+  script:
+    - npm install
+    - npm run test
+    - npm run lint
+  coverage: '/Coverage: \d+\.\d+%/'
+
+build:
+  stage: build
+  script:
+    - docker build -t systech/app:$CI_COMMIT_SHA .
+    - docker push systech/app:$CI_COMMIT_SHA
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  script:
+    - kubectl set image deployment/app app=systech/app:$CI_COMMIT_SHA
+  environment:
+    name: production
+  only:
+    - main
+```
+
+### Déploiement Continu (CD)
+
+Stratégies de déploiement :
+
+- **Blue-Green** : Zero downtime
+- **Canary** : Déploiement progressif
+- **Rolling** : Mise à jour graduelle
+- **Feature Flags** : Activation conditionnelle
+
+## Infrastructure as Code
+
+### Terraform
+
+Provisioning cloud déclaratif :
+
+```hcl
+resource "azurerm_kubernetes_cluster" "systech" {
+  name                = "systech-aks"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  dns_prefix          = "systech"
+
+  default_node_pool {
+    name       = "default"
+    node_count = 3
+    vm_size    = "Standard_D2_v2"
+
+    auto_scaling_enabled = true
+    min_count           = 2
+    max_count           = 10
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  network_profile {
+    network_plugin = "azure"
+    network_policy = "calico"
+  }
+}
+```
+
+### GitOps avec ArgoCD
+
+Synchronisation automatique :
+
+- Déclaratif avec Git comme source de vérité
+- Self-healing applications
+- Rollback automatique
+- Multi-cluster management
+
+## Conteneurisation
+
+### Docker Best Practices
+
+Multi-stage builds pour optimisation :
+
+```dockerfile
+# Build stage
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Production stage
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 3000
+USER node
+CMD ["node", "dist/main.js"]
+```
+
+### Kubernetes
+
+Manifests optimisés :
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: systech-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: systech-api
+  template:
+    metadata:
+      labels:
+        app: systech-api
+    spec:
+      containers:
+        - name: api
+          image: systech/api:latest
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '250m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+```
+
+## Monitoring & Observabilité
+
+### Stack de Monitoring
+
+**Prometheus + Grafana** :
+
+- Métriques système et applicatives
+- Alerting intelligent
+- Dashboards customisables
+
+**ELK Stack** :
+
+- Logs centralisés
+- Recherche et analyse
+- Visualisation Kibana
+
+**Jaeger** :
+
+- Distributed tracing
+- Performance monitoring
+- Bottleneck identification
+
+### SLO/SLI/SLA
+
+Définir et monitorer :
+
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: systech-slo
+spec:
+  groups:
+    - name: slo
+      rules:
+        - alert: HighErrorRate
+          expr: |
+            rate(http_requests_total{status=~"5.."}[5m])
+            / rate(http_requests_total[5m]) > 0.01
+          for: 5m
+          annotations:
+            summary: 'Error rate above SLO'
+```
+
+## Sécurité DevSecOps
+
+### Shift Left Security
+
+Intégrer la sécurité dès le début :
+
+- **SAST** : Static Application Security Testing
+- **DAST** : Dynamic Application Security Testing
+- **SCA** : Software Composition Analysis
+- **Container Scanning** : Vulnérabilités d'images
+
+### Secrets Management
+
+HashiCorp Vault :
+
+```bash
+# Stocker un secret
+vault kv put secret/systech/db \
+  username=admin \
+  password=secure_pass
+
+# Utiliser dans l'application
+vault kv get -field=password secret/systech/db
+```
+
+## Automatisation
+
+### Scripts d'Automatisation
+
+Bash pour tâches courantes :
+
+```bash
+#!/bin/bash
+# Deploy script
+
+set -e
+
+echo "🚀 Starting deployment..."
+
+# Build image
+docker build -t systech/app:$VERSION .
+
+# Run tests
+docker run systech/app:$VERSION npm test
+
+# Push to registry
+docker push systech/app:$VERSION
+
+# Update Kubernetes
+kubectl set image deployment/app app=systech/app:$VERSION
+
+echo "✅ Deployment completed successfully!"
+```
+
+### Ansible pour Configuration
+
+Playbooks pour automatisation :
+
+```yaml
+---
+- name: Configure web servers
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Copy config
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+      notify: Restart nginx
+
+  handlers:
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted
+```
+
+## Métriques Clés
+
+Mesurer le succès DevOps :
+
+- **Deployment Frequency** : Fréquence de déploiement
+- **Lead Time** : Du commit au déploiement
+- **MTTR** : Mean Time To Recovery
+- **Change Failure Rate** : Taux d'échec des changements
+
+## Culture DevOps chez Systech
+
+### Principes Fondamentaux
+
+1. **Collaboration** : Dev + Ops = Success
+2. **Automatisation** : Éliminer les tâches manuelles
+3. **Mesure** : Data-driven decisions
+4. **Partage** : Knowledge sharing
+5. **Amélioration** : Continuous improvement
+
+### Outils que Nous Utilisons
+
+- **Version Control** : Git, GitLab, GitHub
+- **CI/CD** : GitLab CI, GitHub Actions, Jenkins
+- **Container** : Docker, Kubernetes
+- **IaC** : Terraform, Ansible
+- **Cloud** : Azure, AWS, GCP
+- **Monitoring** : Prometheus, Grafana, ELK
+
+## Conclusion
+
+DevOps accélère la livraison tout en maintenant qualité et stabilité. **Systech** implémente des pipelines CI/CD robustes et automatisés pour maximiser votre efficacité.
+
+Modernisez vos pratiques DevOps : [contact@systech.com](mailto:contact@systech.com)

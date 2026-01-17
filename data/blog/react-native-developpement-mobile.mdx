@@ -1,0 +1,371 @@
+---
+title: 'Développement Mobile Cross-Platform avec React Native'
+date: '2025-12-20'
+tags: ['mobile', 'react-native', 'cross-platform', 'app-development']
+draft: false
+summary: 'Créez des applications mobiles performantes pour iOS et Android avec React Native. Découvrez l\'expertise mobile de Systech.'
+authors: ['default']
+---
+
+## React Native : Un Seul Code, Deux Plateformes
+
+Chez **Systech**, nous excellons dans le développement d'applications mobiles cross-platform avec React Native, offrant performance native et efficacité de développement.
+
+## Pourquoi React Native ?
+
+### Avantages Clés
+
+- **Code Partagé** : 80-95% de code réutilisable
+- **Performance Native** : UI performante et fluide
+- **Hot Reload** : Développement rapide
+- **Grande Communauté** : Bibliothèques et support
+- **Coût Réduit** : Une équipe, deux plateformes
+
+## Architecture d'une App Systech
+
+### Structure de Projet
+
+```
+systech-mobile/
+├── src/
+│   ├── components/      # Composants réutilisables
+│   ├── screens/         # Écrans de l'app
+│   ├── navigation/      # React Navigation
+│   ├── services/        # API calls
+│   ├── store/           # State management (Redux)
+│   ├── utils/           # Helpers
+│   └── theme/           # Styles et thème
+├── android/             # Code natif Android
+├── ios/                 # Code natif iOS
+└── __tests__/           # Tests
+```
+
+### Navigation
+
+React Navigation pour routing :
+
+```typescript
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+const Stack = createNativeStackNavigator();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Details"
+          component={DetailsScreen}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+```
+
+## State Management
+
+### Redux Toolkit
+
+Gestion d'état moderne :
+
+```typescript
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { api } from '../services/api'
+
+export const fetchProducts = createAsyncThunk('products/fetch', async () => {
+  const response = await api.get('/products')
+  return response.data
+})
+
+const productsSlice = createSlice({
+  name: 'products',
+  initialState: {
+    items: [],
+    loading: false,
+    error: null,
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchProducts.pending, (state) => {
+        state.loading = true
+      })
+      .addCase(fetchProducts.fulfilled, (state, action) => {
+        state.loading = false
+        state.items = action.payload
+      })
+      .addCase(fetchProducts.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message
+      })
+  },
+})
+```
+
+## UI/UX Moderne
+
+### Styled Components
+
+```typescript
+import styled from 'styled-components/native'
+
+export const Container = styled.View`
+  flex: 1;
+  background-color: ${(props) => props.theme.background};
+  padding: 20px;
+`
+
+export const Title = styled.Text`
+  font-size: 24px;
+  font-weight: bold;
+  color: ${(props) => props.theme.primary};
+  margin-bottom: 16px;
+`
+
+export const Card = styled.TouchableOpacity`
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+  shadow-color: #000;
+  shadow-opacity: 0.1;
+  shadow-radius: 8px;
+  elevation: 3;
+`
+```
+
+### Animations
+
+React Native Reanimated :
+
+```typescript
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  useSharedValue,
+} from 'react-native-reanimated';
+
+const AnimatedCard = () => {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
+
+  const onPressIn = () => {
+    scale.value = withSpring(0.95);
+  };
+
+  const onPressOut = () => {
+    scale.value = withSpring(1);
+  };
+
+  return (
+    <Animated.View
+      style={animatedStyle}
+      onTouchStart={onPressIn}
+      onTouchEnd={onPressOut}
+    >
+      <Card />
+    </Animated.View>
+  );
+};
+```
+
+## Performance
+
+### Optimisations Systech
+
+**1. Mémoïsation**
+
+```typescript
+import { memo, useMemo, useCallback } from 'react';
+
+const ProductCard = memo(({ product, onPress }) => {
+  return (
+    <Card onPress={() => onPress(product.id)}>
+      <Image source={{ uri: product.image }} />
+      <Title>{product.name}</Title>
+    </Card>
+  );
+});
+```
+
+**2. Lazy Loading**
+
+```typescript
+const LazyScreen = React.lazy(() => import('./screens/Details'));
+
+<Suspense fallback={<LoadingSpinner />}>
+  <LazyScreen />
+</Suspense>
+```
+
+**3. Image Optimization**
+
+```typescript
+import FastImage from 'react-native-fast-image';
+
+<FastImage
+  source={{
+    uri: imageUrl,
+    priority: FastImage.priority.high,
+  }}
+  resizeMode={FastImage.resizeMode.cover}
+/>
+```
+
+## Fonctionnalités Natives
+
+### Notifications Push
+
+Firebase Cloud Messaging :
+
+```typescript
+import messaging from '@react-native-firebase/messaging'
+
+async function requestUserPermission() {
+  const authStatus = await messaging().requestPermission()
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL
+
+  if (enabled) {
+    console.log('Authorization status:', authStatus)
+    getFCMToken()
+  }
+}
+
+async function getFCMToken() {
+  const token = await messaging().getToken()
+  console.log('FCM Token:', token)
+  // Send to backend
+}
+```
+
+### Geolocalisation
+
+```typescript
+import Geolocation from '@react-native-community/geolocation'
+
+Geolocation.getCurrentPosition(
+  (position) => {
+    const { latitude, longitude } = position.coords
+    console.log(`Location: ${latitude}, ${longitude}`)
+  },
+  (error) => console.log(error),
+  { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+)
+```
+
+### Authentification Biométrique
+
+```typescript
+import TouchID from 'react-native-touch-id'
+
+const authenticate = async () => {
+  try {
+    const biometryType = await TouchID.isSupported()
+
+    const authenticated = await TouchID.authenticate('Authenticate to continue', {
+      fallbackLabel: 'Use Passcode',
+    })
+
+    if (authenticated) {
+      // Success
+    }
+  } catch (error) {
+    console.log('Authentication Failed')
+  }
+}
+```
+
+## Tests
+
+### Jest & Testing Library
+
+```typescript
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import LoginScreen from '../LoginScreen';
+
+describe('LoginScreen', () => {
+  it('should login successfully', async () => {
+    const { getByPlaceholderText, getByText } = render(<LoginScreen />);
+
+    const emailInput = getByPlaceholderText('Email');
+    const passwordInput = getByPlaceholderText('Password');
+    const loginButton = getByText('Login');
+
+    fireEvent.changeText(emailInput, 'user@systech.com');
+    fireEvent.changeText(passwordInput, 'password123');
+    fireEvent.press(loginButton);
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('Home');
+    });
+  });
+});
+```
+
+## CI/CD Mobile
+
+### Fastlane
+
+Automatisation des déploiements :
+
+```ruby
+# Fastfile
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    increment_build_number
+    build_app(scheme: "Systech")
+    upload_to_testflight
+  end
+end
+
+platform :android do
+  desc "Build and upload to Play Console"
+  lane :beta do
+    increment_version_code
+    gradle(task: "bundle", build_type: "Release")
+    upload_to_play_store(track: "internal")
+  end
+end
+```
+
+## Bonnes Pratiques Systech
+
+1. **TypeScript** : Type safety et autocomplete
+2. **Code Splitting** : Lazy loading des modules
+3. **Error Boundaries** : Gestion d'erreurs robuste
+4. **Analytics** : Tracking des événements
+5. **Crash Reporting** : Sentry ou Firebase Crashlytics
+6. **Security** : Stockage sécurisé, SSL pinning
+7. **Accessibilité** : Support complet a11y
+
+## Ecosystem React Native
+
+### Libraries Essentielles
+
+- **React Navigation** : Navigation
+- **Redux Toolkit** : State management
+- **React Query** : Data fetching
+- **Axios** : HTTP client
+- **Formik + Yup** : Forms et validation
+- **React Native Paper** : UI components
+- **Lottie** : Animations
+- **Detox** : E2E testing
+
+## Conclusion
+
+React Native permet de créer des apps mobiles professionnelles rapidement. **Systech** maîtrise cet écosystème pour livrer des applications performantes et évolutives.
+
+Votre projet mobile nous intéresse : [contact@systech.com](mailto:contact@systech.com)
