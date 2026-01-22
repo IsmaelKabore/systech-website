@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 'use client'
 
 import { usePathname } from 'next/navigation'
@@ -5,10 +6,36 @@ import { slug } from 'github-slugger'
 import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
-import Link from '@/components/Link'
-import Tag from '@/components/Tag'
+import NextLink from 'next/link'
 import siteMetadata from '@/data/siteMetadata'
 import tagData from 'app/tag-data.json'
+
+// ============================================================================
+// LINK COMPONENT
+// ============================================================================
+
+const Link = ({ href, children, ...rest }: any) => {
+  return <NextLink href={href} {...rest}>{children}</NextLink>
+}
+
+// ============================================================================
+// TAG COMPONENT (merged from @/components/Tag.tsx)
+// ============================================================================
+
+const Tag = ({ text }: { text: string }) => {
+  return (
+    <NextLink
+      href={`/tags/${slug(text)}`}
+      className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 mr-3 text-sm font-medium uppercase"
+    >
+      {text.split(' ').join('-')}
+    </NextLink>
+  )
+}
+
+// ============================================================================
+// POST LAYOUT
+// ============================================================================
 
 interface PaginationProps {
   totalPages: number
@@ -66,12 +93,7 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
   )
 }
 
-export default function ListLayoutWithTags({
-  posts,
-  title,
-  initialDisplayPosts = [],
-  pagination,
-}: ListLayoutProps) {
+export default async function ListLayoutWithTags({ posts, title }: { posts: CoreContent<Blog>[]; title: string }) {
   const pathname = usePathname()
   const tagCounts = tagData as Record<string, number>
   const tagKeys = Object.keys(tagCounts)

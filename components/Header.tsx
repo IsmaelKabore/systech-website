@@ -1,75 +1,81 @@
 'use client'
 
 import { motion, useScroll, useTransform } from 'framer-motion'
+import Link from 'next/link'
 import siteMetadata from '@/data/siteMetadata'
 import headerNavLinks from '@/data/headerNavLinks'
-import Logo from '@/data/logo.svg'
-import Link from './Link'
-import MobileNav from './MobileNav'
 import ThemeSwitch from './ThemeSwitch'
-import SearchButton from './SearchButton'
+import { AlgoliaButton } from 'pliny/search/AlgoliaButton'
+import { KBarButton } from 'pliny/search/KBarButton'
 
-const Header = () => {
-  const { scrollY } = useScroll()
+// ============================================================================
+// SEARCH BUTTON (merged from @/components/SearchButton.tsx)
+// ============================================================================
 
-  // Transform scroll position into header properties
-  const headerPadding = useTransform(scrollY, [0, 100], ['2.5rem', '1rem'])
-  const headerBlur = useTransform(scrollY, [0, 100], ['blur(0px)', 'blur(10px)'])
-  const headerBg = useTransform(
-    scrollY,
-    [0, 100],
-    ['rgba(255, 255, 255, 0.95)', 'rgba(255, 255, 255, 0.85)']
-  )
+const SearchButton = () => {
+  if (
+    siteMetadata.search &&
+    (siteMetadata.search.provider === 'algolia' || siteMetadata.search.provider === 'kbar')
+  ) {
+    const SearchButtonWrapper =
+      siteMetadata.search.provider === 'algolia' ? AlgoliaButton : KBarButton
 
-  let headerClass = 'flex items-center w-full justify-between transition-all duration-200'
-  if (siteMetadata.stickyNav) {
-    headerClass += ' sticky top-0 z-50'
+    return (
+      <SearchButtonWrapper aria-label="Search">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="hover:text-primary-500 dark:hover:text-primary-400 h-6 w-6 text-gray-900 dark:text-gray-100"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+          />
+        </svg>
+      </SearchButtonWrapper>
+    )
   }
+}
+
+export default function Header() {
+  const { scrollY } = useScroll()
+  const paddingY = useTransform(scrollY, [0, 100], ['1.75rem', '1rem'])
 
   return (
     <motion.header
-      style={{
-        paddingTop: headerPadding,
-        paddingBottom: headerPadding,
-        backdropFilter: headerBlur,
-        backgroundColor: headerBg,
-      }}
-      className={headerClass}
+      style={{ paddingTop: paddingY, paddingBottom: paddingY }}
+      className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur-md transition-all dark:border-gray-800 dark:bg-black/80"
     >
-      <Link href="/" aria-label={siteMetadata.headerTitle}>
-        <div className="flex items-center justify-between">
-          <div className="mr-3">
-            <Logo />
-          </div>
-          {typeof siteMetadata.headerTitle === 'string' ? (
-            <div className="hidden h-6 text-2xl font-semibold sm:block">
-              {siteMetadata.headerTitle}
-            </div>
-          ) : (
-            siteMetadata.headerTitle
-          )}
-        </div>
-      </Link>
-      <div className="flex items-center space-x-4 leading-5 sm:-mr-6 sm:space-x-6">
-        <div className="no-scrollbar hidden max-w-40 items-center gap-x-4 overflow-x-auto sm:flex md:max-w-72 lg:max-w-96">
+      <div className="mx-auto flex w-full items-center justify-between px-[5%]">
+        <Link
+          href="/"
+          aria-label={siteMetadata.headerTitle as string}
+          className="text-xl font-semibold text-gray-900 dark:text-white"
+        >
+          {typeof siteMetadata.headerTitle === 'string'
+            ? siteMetadata.headerTitle
+            : 'SYS TECH'}
+        </Link>
+        <nav className="flex items-center gap-6">
           {headerNavLinks
-            .filter((link) => link.href !== '/')
-            .map((link) => (
+            .filter((l) => l.href !== '/')
+            .map((l) => (
               <Link
-                key={link.title}
-                href={link.href}
-                className="hover:text-primary-500 dark:hover:text-primary-400 m-1 font-medium text-gray-900 dark:text-gray-100"
+                key={l.title}
+                href={l.href}
+                className="text-sm text-gray-900 hover:underline dark:text-gray-100"
               >
-                {link.title}
+                {l.title}
               </Link>
             ))}
-        </div>
-        <SearchButton />
-        <ThemeSwitch />
-        <MobileNav />
+          <SearchButton />
+          <ThemeSwitch />
+        </nav>
       </div>
     </motion.header>
   )
 }
-
-export default Header

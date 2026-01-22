@@ -1,12 +1,13 @@
 import { ReactNode } from 'react'
 import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog } from 'contentlayer/generated'
+import type { Blog, Authors } from 'contentlayer/generated'
+import NextLink from 'next/link'
+import siteMetadata from '@/data/siteMetadata'
+import { slug } from 'github-slugger'
 import Comments from '@/components/Comments'
-import Link from '@/components/Link'
 import PageTitle from '@/components/PageTitle'
 import SectionContainer from '@/components/SectionContainer'
-import siteMetadata from '@/data/siteMetadata'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 
 interface LayoutProps {
@@ -14,6 +15,51 @@ interface LayoutProps {
   children: ReactNode
   next?: { path: string; title: string }
   prev?: { path: string; title: string }
+}
+
+// ============================================================================
+// LINK COMPONENT
+// ============================================================================
+
+const Link = ({ href, children, ...rest }: React.ComponentProps<typeof NextLink>) => {
+  return <NextLink href={href} {...rest}>{children}</NextLink>
+}
+
+// ============================================================================
+// TAG COMPONENT
+// ============================================================================
+
+const Tag = ({ text }: { text: string }) => {
+  return (
+    <NextLink
+      href={`/tags/${slug(text)}`}
+      className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 mr-3 text-sm font-medium uppercase"
+    >
+      {text.split(' ').join('-')}
+    </NextLink>
+  )
+}
+
+// ============================================================================
+// PAGE TITLE
+// ============================================================================
+
+function PageTitle({ children }: { children: ReactNode }) {
+  return (
+    <h1 className="text-3xl leading-9 font-extrabold tracking-tight text-gray-900 sm:text-4xl sm:leading-10 md:text-5xl md:leading-14 dark:text-gray-100">
+      {children}
+    </h1>
+  )
+}
+
+// ============================================================================
+// SECTION CONTAINER
+// ============================================================================
+
+function SectionContainer({ children }: { children: ReactNode }) {
+  return (
+    <section className="mx-auto max-w-3xl px-4 sm:px-6 xl:max-w-5xl xl:px-0">{children}</section>
+  )
 }
 
 export default function PostLayout({ content, next, prev, children }: LayoutProps) {

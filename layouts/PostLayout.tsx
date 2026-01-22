@@ -1,14 +1,155 @@
-import { ReactNode } from 'react'
+'use client'
+
+import { ReactNode, useState } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'
-import Comments from '@/components/Comments'
-import Link from '@/components/Link'
-import PageTitle from '@/components/PageTitle'
-import SectionContainer from '@/components/SectionContainer'
+import { Comments as CommentsComponent } from 'pliny/comments'
+import NextLink from 'next/link'
 import Image from '@/components/Image'
-import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
-import ScrollTopAndComment from '@/components/ScrollTopAndComment'
+import { slug } from 'github-slugger'
+import { formatDate } from 'pliny/utils/formatDate'
+
+// ============================================================================
+// SECTION CONTAINER
+// ============================================================================
+
+function SectionContainer({ children }: { children: ReactNode }) {
+  return (
+    <section className="mx-auto max-w-3xl px-4 sm:px-6 xl:max-w-5xl xl:px-0">{children}</section>
+  )
+}
+
+// ============================================================================
+// SCROLL TOP AND COMMENT
+// ============================================================================
+
+function ScrollTopAndComment() {
+  const [show, setShow] = useState(false)
+
+  if (typeof window !== 'undefined') {
+    const handleWindowScroll = () => {
+      if (window.scrollY > 50) setShow(true)
+      else setShow(false)
+    }
+
+    window.addEventListener('scroll', handleWindowScroll)
+  }
+
+  const handleScrollTop = () => {
+    window.scrollTo({ top: 0 })
+  }
+  const handleScrollToComment = () => {
+    document.getElementById('comment')?.scrollIntoView()
+  }
+  return (
+    <div
+      className={`fixed right-8 bottom-8 hidden flex-col gap-3 ${show ? 'md:flex' : 'md:hidden'}`}
+    >
+      {siteMetadata.comments?.provider && (
+        <button
+          aria-label="Scroll To Comment"
+          onClick={handleScrollToComment}
+          className="rounded-full bg-gray-200 p-2 text-gray-500 transition-all hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              fillRule="evenodd"
+              d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
+      )}
+      <button
+        aria-label="Scroll To Top"
+        onClick={handleScrollTop}
+        className="rounded-full bg-gray-200 p-2 text-gray-500 transition-all hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
+      >
+        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path
+            fillRule="evenodd"
+            d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
+// ============================================================================
+// LINK COMPONENT
+// ============================================================================
+
+const CustomLink = ({ href, children, ...rest }: React.ComponentProps<'a'>) => {
+  const isInternalLink = href && href.startsWith('/')
+  const isAnchorLink = href && href.startsWith('#')
+
+  if (isInternalLink) {
+    return <NextLink className="break-words" href={href} {...rest}>{children}</NextLink>
+  }
+
+  if (isAnchorLink) {
+    return <a className="break-words" href={href} {...rest}>{children}</a>
+  }
+
+  return (
+    <a className="break-words" target="_blank" rel="noopener noreferrer" href={href} {...rest}>{children}</a>
+  )
+}
+
+// ============================================================================
+// PAGE TITLE (merged from @/components/PageTitle.tsx)
+// ============================================================================
+
+function PageTitle({ children }: { children: ReactNode }) {
+  return (
+    <h1 className="text-3xl leading-9 font-extrabold tracking-tight text-gray-900 sm:text-4xl sm:leading-10 md:text-5xl md:leading-14 dark:text-gray-100">
+      {children}
+    </h1>
+  )
+}
+
+// ============================================================================
+// TAG COMPONENT (merged from @/components/Tag.tsx)
+// ============================================================================
+
+const Tag = ({ text }: { text: string }) => {
+  return (
+    <Link
+      href={`/tags/${slug(text)}`}
+      className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 mr-3 text-sm font-medium uppercase"
+    >
+      {text.split(' ').join('-')}
+    </Link>
+  )
+}
+
+// ============================================================================
+// COMMENTS (merged from @/components/Comments.tsx)
+// ============================================================================
+
+function Comments({ slug: commentSlug }: { slug: string }) {
+  const [loadComments, setLoadComments] = useState(false)
+
+  if (!siteMetadata.comments?.provider) {
+    return null
+  }
+  return (
+    <>
+      {loadComments ? (
+        <CommentsComponent commentsConfig={siteMetadata.comments} slug={commentSlug} />
+      ) : (
+        <button onClick={() => setLoadComments(true)}>Load Comments</button>
+      )}
+    </>
+  )
+}
+
+// ============================================================================
+// POST LAYOUT
+// ============================================================================
 
 const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
 const discussUrl = (path) =>

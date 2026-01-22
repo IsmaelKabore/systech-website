@@ -1,14 +1,68 @@
-import { ReactNode } from 'react'
-import Image from '@/components/Image'
-import Bleed from 'pliny/ui/Bleed'
+import { ReactNode, useState } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
-import Comments from '@/components/Comments'
-import Link from '@/components/Link'
-import PageTitle from '@/components/PageTitle'
-import SectionContainer from '@/components/SectionContainer'
+import NextLink from 'next/link'
+import Image from '@/components/Image'
 import siteMetadata from '@/data/siteMetadata'
-import ScrollTopAndComment from '@/components/ScrollTopAndComment'
+import { slug } from 'github-slugger'
+import Bleed from 'pliny/ui/Bleed'
+import { Comments as CommentsComponent } from 'pliny/comments'
+
+// ============================================================================
+// LINK COMPONENT
+// ============================================================================
+
+const Link = ({ href, children, ...rest }: React.ComponentProps<typeof NextLink>) => {
+  return <NextLink href={href} {...rest}>{children}</NextLink>
+}
+
+// ============================================================================
+// TAG COMPONENT
+// ============================================================================
+
+const Tag = ({ text }: { text: string }) => {
+  return (
+    <NextLink
+      href={`/tags/${slug(text)}`}
+      className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 mr-3 text-sm font-medium uppercase"
+    >
+      {text.split(' ').join('-')}
+    </NextLink>
+  )
+}
+
+// ============================================================================
+// COMMENTS
+// ============================================================================
+
+function Comments({ slug: commentSlug }: { slug: string }) {
+  const [loadComments, setLoadComments] = useState(false)
+
+  if (!siteMetadata.comments?.provider) {
+    return null
+  }
+  return (
+    <>
+      {loadComments ? (
+        <CommentsComponent commentsConfig={siteMetadata.comments} slug={commentSlug} />
+      ) : (
+        <button onClick={() => setLoadComments(true)}>Load Comments</button>
+      )}
+    </>
+  )
+}
+
+// ============================================================================
+// PAGE TITLE
+// ============================================================================
+
+function PageTitle({ children }: { children: ReactNode }) {
+  return (
+    <h1 className="text-3xl leading-9 font-extrabold tracking-tight text-gray-900 sm:text-4xl sm:leading-10 md:text-5xl md:leading-14 dark:text-gray-100">
+      {children}
+    </h1>
+  )
+}
 
 interface LayoutProps {
   content: CoreContent<Blog>
@@ -23,8 +77,7 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
     images && images.length > 0 ? images[0] : 'https://picsum.photos/seed/picsum/800/400'
 
   return (
-    <SectionContainer>
-      <ScrollTopAndComment />
+    <>
       <article>
         <div>
           <div className="space-y-1 pb-10 text-center dark:border-gray-700">
@@ -73,6 +126,6 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
           </footer>
         </div>
       </article>
-    </SectionContainer>
+    </>
   )
 }
