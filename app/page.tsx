@@ -568,7 +568,7 @@ function CTA() {
                 Nous contacter <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
               <Link
-                href="/about"
+                href="/apropos"
                 className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-bold text-gray-900 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900"
               >
                 À propos
