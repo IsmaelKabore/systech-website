@@ -7,8 +7,11 @@
     "dev": "cross-env INIT_CWD=$PWD next dev",
     "build": "cross-env INIT_CWD=$PWD next build && cross-env NODE_OPTIONS='--experimental-json-modules' node ./scripts/postbuild.mjs",
     "serve": "next start",
-    "analyze": "cross-env ANALYZE=true next build",
-  },
+    "analyze": "cross-env ANALYZE=true next build"
+  },  "engines": {
+    "node": ">=18.0.0"
+  }
+,
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
     "@headlessui/react": "2.2.0",
