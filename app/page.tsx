@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import React, { useMemo, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useMemo, useRef, useState } from 'react'
+import { motion, useScroll, useTransform, AnimatePresence, useMotionValueEvent } from 'framer-motion'
 import {
   ArrowRight,
   ChevronLeft,
@@ -15,24 +15,6 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 
-/**
- * Notes importantes (anti-bugs scroll)
- * - Pas de "fixed inset-0" global qui reste actif sur toute la page.
- * - Pas de sticky positioning ou scroll hijacking.
- * - Animations: whileInView + viewport (safe) pour éviter les glitches.
- * - Défilement naturel 100% garanti.
- */
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0 },
-}
-
-const fade = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1 },
-}
-
 const appleEase = [0.25, 0.1, 0.25, 1] as const
 
 export default function HomePage() {
@@ -41,7 +23,6 @@ export default function HomePage() {
       <Hero />
       <TrustBar />
       <SolutionsCarousel />
-      <AppleStickyStory />
       <Process />
       <Stats />
       <CTA />
@@ -49,34 +30,17 @@ export default function HomePage() {
   )
 }
 
-/* ------------------------ layout helpers ------------------------ */
-
 function Container({ children }: { children: React.ReactNode }) {
   return <div className="mx-auto w-full max-w-7xl px-4 sm:px-8 lg:px-12">{children}</div>
 }
 
-function Reveal({
-  children,
-  delay = 0,
-  y = 18,
-}: {
-  children: React.ReactNode
-  delay?: number
-  y?: number
-}) {
+function Reveal({ children, delay = 0, y = 18 }: { children: React.ReactNode; delay?: number; y?: number }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{ duration: 0.6, ease: appleEase, delay }}
-    >
+    <motion.div initial={{ opacity: 0, y }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.6, ease: appleEase, delay }}>
       {children}
     </motion.div>
   )
 }
-
-/* ------------------------ HERO ------------------------ */
 
 function Hero() {
   return (
@@ -99,31 +63,24 @@ function Hero() {
 
             <Reveal delay={0.05}>
               <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-                Infrastructure numérique souveraine pour l’Afrique
+                Infrastructure numérique souveraine pour l'Afrique
               </h1>
             </Reveal>
 
             <Reveal delay={0.1}>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-gray-600 sm:text-lg dark:text-gray-300">
-                SYS TECH sécurise les systèmes critiques, déploie des réseaux, et accompagne la transformation
-                numérique avec une approche fiable, moderne et mesurable.
+                SYS TECH sécurise les systèmes critiques, déploie des réseaux, et accompagne la transformation numérique avec une approche fiable, moderne et mesurable.
               </p>
             </Reveal>
 
             <Reveal delay={0.15}>
               <div className="mt-8 flex flex-wrap gap-4">
-                <Link
-                  href="/contact"
-                  className="group inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.99]"
-                >
+                <Link href="/contact" className="group inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.99]">
                   Planifier une consultation
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
 
-                <Link
-                  href="#solutions"
-                  className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900"
-                >
+                <Link href="#solutions" className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900">
                   Découvrir nos solutions
                 </Link>
               </div>
@@ -156,9 +113,7 @@ function HeroVisual() {
         <div className="p-6 sm:p-8">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">Tableau de pilotage</p>
-            <span className="rounded-full bg-green-500/10 px-3 py-1 text-xs font-bold text-green-600 dark:text-green-400">
-              24/7 Monitoring
-            </span>
+            <span className="rounded-full bg-green-500/10 px-3 py-1 text-xs font-bold text-green-600 dark:text-green-400">24/7 Monitoring</span>
           </div>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -227,7 +182,7 @@ type Solution = {
 function SolutionsCarousel() {
   const [index, setIndex] = useState(0)
 
-  const solutions: Solution[] = useMemo(
+  const solutions = useMemo<Solution[]>(
     () => [
       {
         title: 'Cybersécurité avancée',
