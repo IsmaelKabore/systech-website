@@ -1,13 +1,74 @@
-import Link from '@/components/Link'
-import Tag from '@/components/Tag'
+import NextLink from 'next/link'
 import { slug } from 'github-slugger'
-import tagData from 'app/tag-data.json'
-import { genPageMetadata } from 'app/seo'
+import { allBlogs } from 'contentlayer/generated'
+import { Metadata } from 'next'
+import siteMetadata from '@/data/siteMetadata'
+
+// Inline Link component
+const Link = ({ href, ...rest }: React.ComponentProps<typeof NextLink>) => (
+  <NextLink href={href} {...rest} />
+)
+
+// Inline Tag component
+const Tag = ({ text }: { text: string }) => (
+  <NextLink
+    href={`/tags/${slug(text)}`}
+    className="mr-3 text-sm font-medium uppercase text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+  >
+    {text.split(' ').join('-')}
+  </NextLink>
+)
+
+// Inline SEO metadata generator
+function genPageMetadata({ title, description, image, ...rest }: {
+  title: string
+  description?: string
+  image?: string
+  [key: string]: any
+}): Metadata {
+  return {
+    title,
+    description: description || siteMetadata.description,
+    openGraph: {
+      title: `${title} | ${siteMetadata.title}`,
+      description: description || siteMetadata.description,
+      url: './',
+      siteName: siteMetadata.title,
+      images: image ? [image] : [siteMetadata.socialBanner],
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      title: `${title} | ${siteMetadata.title}`,
+      card: 'summary_large_image',
+      images: image ? [image] : [siteMetadata.socialBanner],
+    },
+    ...rest,
+  }
+}
 
 export const metadata = genPageMetadata({ title: 'Tags', description: 'Things I blog about' })
 
+// Generate tag data from all blogs
+function generateTagData() {
+  const tagCounts: Record<string, number> = {}
+  allBlogs.forEach((post) => {
+    if (post.tags && Array.isArray(post.tags)) {
+      post.tags.forEach((tag) => {
+        const formattedTag = slug(tag)
+        if (formattedTag in tagCounts) {
+          tagCounts[formattedTag] += 1
+        } else {
+          tagCounts[formattedTag] = 1
+        }
+      })
+    }
+  })
+  return tagCounts
+}
+
 export default async function Page() {
-  const tagCounts = tagData as Record<string, number>
+  const tagCounts = generateTagData()
   const tagKeys = Object.keys(tagCounts)
   const sortedTags = tagKeys.sort((a, b) => tagCounts[b] - tagCounts[a])
   return (

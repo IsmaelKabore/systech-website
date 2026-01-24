@@ -2,6 +2,7 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 import siteMetadata from '@/data/siteMetadata'
 import headerNavLinks from '@/data/headerNavLinks'
 import ThemeSwitch from './ThemeSwitch'
@@ -54,24 +55,41 @@ export default function Header() {
         <Link
           href="/"
           aria-label={siteMetadata.headerTitle as string}
-          className="text-xl font-semibold text-gray-900 dark:text-white"
+          className="flex items-center gap-3 text-xl font-semibold text-gray-900 dark:text-white"
         >
-          {typeof siteMetadata.headerTitle === 'string'
-            ? siteMetadata.headerTitle
-            : 'SYS TECH'}
+          <div className="relative h-8 w-8 flex-shrink-0">
+            <Image
+              src="/static/images/logo.png"
+              alt="SYSTEC Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+          <span>
+            {typeof siteMetadata.headerTitle === 'string'
+              ? siteMetadata.headerTitle
+              : 'SYS TECH'}
+          </span>
         </Link>
-        <nav className="flex items-center gap-6">
+        <nav className="flex items-center gap-4 md:gap-6">
           {headerNavLinks
             .filter((l) => l.href !== '/')
             .map((l) => (
               <Link
                 key={l.title}
                 href={l.href}
-                className="text-sm text-gray-900 hover:underline dark:text-gray-100"
+                className="text-sm font-medium text-gray-900 transition-colors hover:text-cyan-600 dark:text-gray-100 dark:hover:text-cyan-400"
               >
                 {l.title}
               </Link>
             ))}
+          <Link
+            href="/contact"
+            className="text-sm font-medium text-gray-900 transition-colors hover:text-cyan-600 dark:text-gray-100 dark:hover:text-cyan-400"
+          >
+            Contact
+          </Link>
           <SearchButton />
           <ThemeSwitch />
         </nav>
