@@ -69,7 +69,6 @@ module.exports = () => {
     reactStrictMode: true,
     trailingSlash: false,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-    turbopack: {},
     images: {
       remotePatterns: [
         {
@@ -91,13 +90,7 @@ module.exports = () => {
         },
       ]
     },
-    webpack: (config, options) => {
-      config.module.rules.push({
-        test: /\.svg$/,
-        use: ['@svgr/webpack'],
-      })
-
-      return config
-    },
+    // Webpack config removed for Next.js 16 Turbopack compatibility
+    // SVG handling can be done via next/image or a different approach if needed
   })
 }
