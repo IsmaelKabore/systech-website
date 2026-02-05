@@ -22,7 +22,7 @@ export default function HomePage() {
     <main className="relative w-full bg-white text-gray-900 dark:bg-black dark:text-white">
       <Hero />
       <TrustBar />
-      <SolutionsCarousel />
+      <ServicesCarousel />
       <Process />
       <Stats />
       <CTA />
@@ -80,8 +80,8 @@ function Hero() {
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
 
-                <Link href="#solutions" className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900">
-                  Découvrir nos solutions
+                <Link href="#services" className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-black dark:text-white dark:hover:bg-gray-900">
+                  Découvrir nos services
                 </Link>
               </div>
             </Reveal>
@@ -168,9 +168,9 @@ function TrustBar() {
   )
 }
 
-/* ------------------------ SOLUTIONS (carousel full-screen) ------------------------ */
+/* ------------------------ SERVICES (carousel full-screen) ------------------------ */
 
-type Solution = {
+type Services = {
   title: string
   description: string
   image: string
@@ -179,10 +179,10 @@ type Solution = {
   href: string
 }
 
-function SolutionsCarousel() {
+function ServicesCarousel() {
   const [index, setIndex] = useState(0)
 
-  const solutions = useMemo<Solution[]>(
+  const services = useMemo<Services[]>(
     () => [
       {
         title: 'Cybersécurité avancée',
@@ -224,19 +224,35 @@ function SolutionsCarousel() {
         bullets: ['APIs', 'Automatisation', 'Observabilité', 'Intégration SI'],
         href: '/services',
       },
+      {
+  title: "Fourniture d’équipement informatique",
+  description:
+    "Approvisionnement, installation et configuration de matériel informatique professionnel adapté aux besoins des entreprises.",
+  image:
+    "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=2400&q=80",
+  icon: Shield,
+  bullets: [
+    "Ordinateurs & serveurs",
+    "Des equipements connectés intelligents",
+    "Équipements réseau",
+    "Installation & configuration",
+    "Des équipements Mobi IoT "
+  ],
+  href: "/services",
+},
     ],
     []
   )
 
-  const prev = () => setIndex((i) => (i - 1 + solutions.length) % solutions.length)
-  const next = () => setIndex((i) => (i + 1) % solutions.length)
+  const prev = () => setIndex((i) => (i - 1 + services.length) % services.length)
+  const next = () => setIndex((i) => (i + 1) % services.length)
 
   return (
-    <section id="solutions" className="bg-white py-20 dark:bg-black">
+    <section id="services" className="bg-white py-20 dark:bg-black">
       <Container>
         <Reveal>
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-extrabold sm:text-4xl">Nos solutions</h2>
+            <h2 className="text-3xl font-extrabold sm:text-4xl">Nos services</h2>
             <p className="mt-3 text-base text-gray-600 dark:text-gray-300">
               Des cartes full-screen, visuelles, avec un slider futuriste — exactement ce que tu veux.
             </p>
@@ -258,8 +274,8 @@ function SolutionsCarousel() {
                   {/* image */}
                   <div className="absolute inset-0">
                     <Image
-                      src={solutions[index].image}
-                      alt={solutions[index].title}
+                      src={services[index].image}
+                      alt={services[index].title}
                       fill
                       priority={index === 0}
                       className="object-cover"
@@ -272,21 +288,22 @@ function SolutionsCarousel() {
                   <div className="relative z-10 flex h-full w-full flex-col justify-end p-7 sm:p-10 lg:p-14">
                     <div className="mb-4 inline-flex items-center gap-2 self-start rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
                       {(() => {
-                        const Icon = solutions[index].icon
+                        const Icon = services[index].icon
                         return <Icon className="h-4 w-4" />
                       })()}
-                      Solution {index + 1} / {solutions.length}
+                      <div className="absolute top-8 left-8 text-white text-sm"></div>
+                      Service {index + 1} / {services.length}
                     </div>
 
-                    <h3 className="max-w-3xl text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                      {solutions[index].title}
+                    <h3 className="max-w-2xl text-2xl font-extrabold tracking-tight text-white sm:text-3xl lg:text-5xl">
+                      {services[index].title}
                     </h3>
                     <p className="mt-3 max-w-2xl text-base leading-relaxed text-white/85 sm:text-lg">
-                      {solutions[index].description}
+                      {services[index].description}
                     </p>
 
                     <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                      {solutions[index].bullets.map((b) => (
+                      {services[index].bullets.map((b) => (
                         <div
                           key={b}
                           className="rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white/90 backdrop-blur"
@@ -301,7 +318,7 @@ function SolutionsCarousel() {
 
                     <div className="mt-7 flex flex-wrap items-center gap-4">
                       <Link
-                        href={solutions[index].href}
+                        href={services[index].href}
                         className="inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-extrabold text-gray-900 transition hover:bg-white/90"
                       >
                         Voir les détails <ArrowRight className="ml-2 h-4 w-4" />
@@ -327,7 +344,7 @@ function SolutionsCarousel() {
 
                     {/* dots */}
                     <div className="mt-5 flex gap-2">
-                      {solutions.map((_, i) => (
+                      {services.map((_, i) => (
                         <button
                           key={i}
                           onClick={() => setIndex(i)}
