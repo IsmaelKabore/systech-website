@@ -79,7 +79,7 @@ const teamMembers: TeamMember[] = [
   {
     name: 'Gérant',
     role: 'Chairman',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
+    image: '/static/images/Gérant.png',
     quote:
       "Notre vision est de construire une infrastructure technologique durable en Afrique, fondée sur la confiance institutionnelle et l'excellence technique. Nous croyons en des partenariats de long terme qui transforment réellement les capacités numériques du continent.",
     focus: ['Vision long terme', 'Confiance institutionnelle', 'Durabilité'],
