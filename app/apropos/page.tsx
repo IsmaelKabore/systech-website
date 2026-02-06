@@ -87,7 +87,7 @@ const teamMembers: TeamMember[] = [
   {
     name: 'Co-Gérant',
     role: 'CEO',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=80',
+    image: '/static/images/Co-Gerant.jpg',
     quote:
       "L'exécution est au cœur de notre approche. Nous transformons les partenariats en résultats concrets, en croissance mesurable et en impact réel. Chaque projet est une opportunité de renforcer les capacités locales et de créer de la valeur durable.",
     focus: ['Exécution', 'Partenariats', 'Impact mesurable'],
