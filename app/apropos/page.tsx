@@ -77,7 +77,7 @@ type TeamMember = {
 
 const teamMembers: TeamMember[] = [
   {
-    name: 'Président',
+    name: 'Gérant',
     role: 'Chairman',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
     quote:
@@ -85,7 +85,7 @@ const teamMembers: TeamMember[] = [
     focus: ['Vision long terme', 'Confiance institutionnelle', 'Durabilité'],
   },
   {
-    name: 'Directeur Général',
+    name: 'Co-Gérant',
     role: 'CEO',
     image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=80',
     quote:
@@ -93,7 +93,7 @@ const teamMembers: TeamMember[] = [
     focus: ['Exécution', 'Partenariats', 'Impact mesurable'],
   },
   {
-    name: 'Développeur Principal',
+    name: 'Les Développeurs',
     role: 'Full-stack / Assistive Tech Developer',
     image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=80',
     quote:

@@ -23,11 +23,12 @@ export default function Header() {
           aria-label={siteMetadata.headerTitle as string}
           className="flex items-center gap-3 text-xl font-semibold text-gray-900 dark:text-white"
         >
-          <div className="relative h-8 w-8 flex-shrink-0">
+          <div className="relative h-32 w-32 flex-shrink-0">
             <Image
               src="/static/images/logo.png"
               alt="SYSTEC Logo"
-              fill
+              width={200}
+              height={200}
               className="object-contain"
               priority
             />

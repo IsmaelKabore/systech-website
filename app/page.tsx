@@ -69,7 +69,7 @@ function Hero() {
 
             <Reveal delay={0.1}>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-gray-600 sm:text-lg dark:text-gray-300">
-                SYS TECH sécurise les systèmes critiques, déploie des réseaux, et accompagne la transformation numérique avec une approche fiable, moderne et mesurable.
+                SYST TECH sécurise les systèmes critiques, déploie des réseaux, et accompagne la transformation numérique avec une approche fiable, moderne et mesurable.
               </p>
             </Reveal>
 
@@ -192,7 +192,7 @@ function ServicesCarousel() {
           'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=2400&auto=format&fit=crop&q=80',
         icon: Shield,
         bullets: ['SOC 24/7', 'Threat intel', 'Réponse incident', 'Durcissement & audit'],
-        href: '/services',
+        href: '#services',
       },
       {
         title: 'Réseaux & fibre optique',
@@ -202,7 +202,7 @@ function ServicesCarousel() {
           'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=2400&auto=format&fit=crop&q=80',
         icon: Globe,
         bullets: ['Backbone', 'Supervision', 'Interconnexion', 'QoS & performance'],
-        href: '/services',
+        href: '#services',
       },
       {
         title: 'Data center & cloud hybride',
@@ -212,7 +212,7 @@ function ServicesCarousel() {
           'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=2400&auto=format&fit=crop&q=80',
         icon: Cpu,
         bullets: ['HA / DR', 'Sauvegarde', 'Cloud hybride', 'Sécurité infra'],
-        href: '/services',
+        href: '#services',
       },
       {
         title: 'Logiciels & intégration',
@@ -222,14 +222,14 @@ function ServicesCarousel() {
           'https://images.unsplash.com/photo-1518770660439-4636190af475?w=2400&auto=format&fit=crop&q=80',
         icon: Code,
         bullets: ['APIs', 'Automatisation', 'Observabilité', 'Intégration SI'],
-        href: '/services',
+        href: '#services',
       },
       {
   title: "Fourniture d’équipement informatique",
   description:
     "Approvisionnement, installation et configuration de matériel informatique professionnel adapté aux besoins des entreprises.",
   image:
-    "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=2400&q=80",
+    "https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?auto=format&fit=crop&w=2400&q=80",
   icon: Shield,
   bullets: [
     "Ordinateurs & serveurs",
@@ -238,7 +238,7 @@ function ServicesCarousel() {
     "Installation & configuration",
     "Des équipements Mobi IoT "
   ],
-  href: "/services",
+  href: "#services",
 },
     ],
     []
